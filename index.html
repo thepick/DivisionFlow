@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FactFlow</title>
+  <title>DivisionFlow</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
 
 <style>
@@ -1180,7 +1181,7 @@
   (function(){
     var pref = 'system';
     try {
-      pref = localStorage.getItem('factflow-theme-pref') || localStorage.getItem('factflow-theme') || 'system';
+      pref = localStorage.getItem('divisionflow-theme-pref') || localStorage.getItem('divisionflow-theme') || 'system';
     } catch (e) {}
     if (pref !== 'light' && pref !== 'dark' && pref !== 'system') pref = 'system';
     var t = pref;
@@ -1203,13 +1204,13 @@
   <div class="app">
     <header class="header">
       <div class="brand">
-        <div class="logo" aria-label="FactFlow logo" role="img">
+        <div class="logo" aria-label="DivisionFlow logo" role="img">
           <svg class="logo-mark" viewBox="0 0 38 38" aria-hidden="true" focusable="false">
             <circle cx="19" cy="19" r="19" fill="#454a93"></circle>
-            <path d="M12 12 L26 26 M26 12 L12 26" stroke="#ffffff" stroke-width="5.2" stroke-linecap="round"></path>
+            <path d="M11 19 H27" stroke="#ffffff" stroke-width="4" stroke-linecap="round"></path><circle cx="19" cy="10" r="2.5" fill="#ffffff"></circle><circle cx="19" cy="28" r="2.5" fill="#ffffff"></circle>
           </svg>
         </div>
-        <h1>FactFlow</h1>
+        <h1>DivisionFlow</h1>
       </div>
       <div class="header-actions">
         <div class="header-google-auth" id="headerGoogleAuth">
@@ -1554,7 +1555,7 @@
         <h2 id="scoreInfoTitle">How the Mastery Score Works</h2>
         <button type="button" class="info-close-btn" id="scoreInfoCloseBtn" aria-label="Close information"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
       </div>
-      <p>Your score is mostly based on how many multiplication facts you have mastered.</p>
+      <p>Your score is mostly based on how many division facts you have mastered.</p>
       <ul>
         <li>Green facts are fast, accurate, and consistent across spaced attempts.</li>
         <li>Light green (dashed border) facts are "Almost There" - a few more correct answers will turn them fully green.</li>
@@ -1587,7 +1588,7 @@
     var GOOGLE_CLIENT_ID = '220590044784-6bohsjumu2r67ds92lhmfdubhh3qen5i.apps.googleusercontent.com';
     var GOOGLE_DRIVE_APPDATA_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
     var GOOGLE_DRIVE_SCOPE = GOOGLE_DRIVE_APPDATA_SCOPE + ' https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
-    var DRIVE_FILE_NAME = 'factflow_data.json';
+    var DRIVE_FILE_NAME = 'divisionflow_data.json';
     var DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
     var DRIVE_UPLOAD_BASE = 'https://www.googleapis.com/upload/drive/v3';
 
@@ -1601,25 +1602,25 @@
     var TOKEN_REFRESH_BEFORE_ROUND_MS = 7 * 60 * 1000;
 
     // Local sync metadata keys.
-    var LOCAL_DEVICE_ID_KEY = 'factflow-device-id';
-    var SYNC_ENABLED_KEY = 'factflow-sync-enabled-before';
-    var SYNC_TOKEN_SESSION_KEY = 'factflow-google-token-session';
-    var GOOGLE_USER_CACHE_KEY = 'factflow-google-user-cache';
-    var SYNC_INTENT_KEY = 'factflow_intent_to_sync';
-    var UNSYNCED_RECOVERY_KEY = 'factflow-unsynced-recovery-v1';
+    var LOCAL_DEVICE_ID_KEY = 'divisionflow-device-id';
+    var SYNC_ENABLED_KEY = 'divisionflow-sync-enabled-before';
+    var SYNC_TOKEN_SESSION_KEY = 'divisionflow-google-token-session';
+    var GOOGLE_USER_CACHE_KEY = 'divisionflow-google-user-cache';
+    var SYNC_INTENT_KEY = 'divisionflow_intent_to_sync';
+    var UNSYNCED_RECOVERY_KEY = 'divisionflow-unsynced-recovery-v1';
 
     // ═══════════════════════════ CONFIG ═══════════════════════════
-    var STORAGE_KEY         = 'factflow-progress-';  // localStorage key prefix
-    var SETTINGS_KEY       = 'factflow-settings';    // persist teacher settings
-    var THEME_PREF_KEY    = 'factflow-theme-pref'; // 'light', 'dark', or 'system'
-    var HAPTICS_KEY       = 'factflow-haptics-enabled'; // mobile haptic preference
-    var SIGNED_IN_WORKING_PROGRESS_KEY = 'factflow-current-session-progress';
+    var STORAGE_KEY         = 'divisionflow-progress-';  // localStorage key prefix
+    var SETTINGS_KEY       = 'divisionflow-settings';    // persist teacher settings
+    var THEME_PREF_KEY    = 'divisionflow-theme-pref'; // 'light', 'dark', or 'system'
+    var HAPTICS_KEY       = 'divisionflow-haptics-enabled'; // mobile haptic preference
+    var SIGNED_IN_WORKING_PROGRESS_KEY = 'divisionflow-current-session-progress';
 
     // ═══════════════════════════ CLASSROOM / SHARED DEVICE ═══════════════════════════
     var REQUIRE_SIGN_IN_TO_PRACTICE = true;
     var SHARED_DEVICE_MODE = true;
-    var STARTING_TABLE = 2;   // First times table (default: 2)
-    var MAX_TABLE      = 12;  // Last times table  (default: 12)
+    var STARTING_TABLE = 2;   // First division table (default: 2)
+    var MAX_TABLE      = 12;  // Last division table  (default: 12)
 
     // User-adjustable speed target.
     // Saved on the synced progress object so each Google user can have a different target.
@@ -1665,7 +1666,7 @@
 
     var APP_SETTINGS = {
       durationSec: 60,
-      orderMode: 'mixed',        // 'fixed', 'reverse', or 'mixed'
+      orderMode: 'fixed',        // Keep the divisor fixed within each level.
       timeoutSec: 12,
       reviewMixPct: 30,
       adaptive: {
@@ -1677,12 +1678,12 @@
     };
 
     // ═══════════════════════════ CLASSROOM SUBMISSION ═══════════════════════════
-    // Normal factflow.mtomlinson.ca use stays personal-practice only.
+    // Normal divisionflow.mtomlinson.ca use stays personal-practice only.
     // Classroom submission is enabled only by a valid ?t= key below.
     // Apps Script URLs are filled from the existing FactFlow Quiz class routes.
     // IMPORTANT: before practice submissions will work, those Apps Script projects
     // must be updated to the combined receiver in factflow-practice-apps-script.gs.
-    var CLASSROOM_SUBMIT_VERSION = 'factflow-practice-submit-v1';
+    var CLASSROOM_SUBMIT_VERSION = 'divisionflow-practice-submit-v1';
     var TEACHERS = {
       'IP5/8': {
         name: 'Ajarn Jordan - IP5/8',
@@ -1949,7 +1950,7 @@
           // Merge saved values over defaults so new fields aren't undefined.
           return {
             durationSec: saved.durationSec || 60,
-            orderMode: saved.orderMode || 'mixed',
+            orderMode: 'fixed',
             timeoutSec: saved.timeoutSec || 12,
             reviewMixPct: saved.reviewMixPct || 30,
             adaptive: {
@@ -2014,7 +2015,7 @@
       syncState.quotaBlocked = info.type === 'quota';
       syncState.permissionBlocked = info.type === 'permission';
       setSyncStatus('error', info.message);
-      if (typeof console !== 'undefined' && console.warn) console.warn('[FactFlow sync]', reason, info.type, e);
+      if (typeof console !== 'undefined' && console.warn) console.warn('[DivisionFlow sync]', reason, info.type, e);
       return info;
     }
 
@@ -2048,7 +2049,7 @@
         localStorage.setItem(getRecoveryKey(user.email), JSON.stringify(copy));
         return true;
       } catch (e) {
-        if (typeof console !== 'undefined' && console.warn) console.warn('[FactFlow recovery] Could not save recovery copy', e);
+        if (typeof console !== 'undefined' && console.warn) console.warn('[DivisionFlow recovery] Could not save recovery copy', e);
         return false;
       }
     }
@@ -2121,7 +2122,7 @@
         classroomState.teacherKey = key || String(rawKey || '').trim();
         classroomState.teacherName = 'Unknown class route';
         classroomState.routeError = 'Unknown class code "' + String(rawKey || '').trim() + '". Upload cancelled. Use one of: ' + getValidClassroomRouteList() + '.';
-        if (window.console && console.warn) console.warn('FactFlow classroom mode rejected invalid teacher key:', rawKey);
+        if (window.console && console.warn) console.warn('DivisionFlow classroom mode rejected invalid teacher key:', rawKey);
       }
     }
 
@@ -2302,7 +2303,7 @@
 
     function handleStorageFailure(label, e) {
       if (typeof console !== 'undefined' && console.warn) {
-        console.warn('[FactFlow storage]', label, e);
+        console.warn('[DivisionFlow storage]', label, e);
       }
       if (syncState) {
         syncState.storageBlocked = true;
@@ -2886,7 +2887,7 @@
       var isfast = fpm >= target;
       var note = '';
       if (graduated) {
-        note = 'You unlocked a new times table - your score jumped!';
+        note = 'You unlocked a new division table - your score jumped!';
       } else if (diff > 4) {
         note = 'Great round! Fast, accurate answers pushed your score up by ' + diff + ' points.';
       } else if (diff > 0) {
@@ -3196,7 +3197,7 @@
       var stampMs = nowMs();
       return {
         schemaVersion: 1,
-        app: 'FactFlow',
+        app: 'DivisionFlow',
         updatedAt: new Date(stampMs).toISOString(),
         updatedAtMs: stampMs,
         deviceId: syncState.deviceId || getDeviceId(),
@@ -3209,7 +3210,7 @@
 
     function unwrapDriveProgress(data) {
       if (!data) return null;
-      if (data.app === 'FactFlow' && data.progress) return data.progress;
+      if (data.app === 'DivisionFlow' && data.progress) return data.progress;
       if (data.factStats || data.sessionHistory || typeof data.currentTable !== 'undefined') return data;
       return null;
     }
@@ -3325,7 +3326,7 @@
     }
 
     function requestGoogleSignIn() {
-      console.log('[FactFlow Sync] requestGoogleSignIn');
+      console.log('[DivisionFlow Sync] requestGoogleSignIn');
       if (!syncState.tokenClient) {
         setSyncStatus('error', 'Google sync is still loading');
         return;
@@ -3495,7 +3496,7 @@
     }
 
     function handleTokenResponse(tokenResponse) {
-      console.log('[FactFlow Sync] handleTokenResponse', {
+      console.log('[DivisionFlow Sync] handleTokenResponse', {
         hasToken: !!tokenResponse,
         error: tokenResponse && tokenResponse.error,
         scope: tokenResponse && tokenResponse.scope
@@ -3562,7 +3563,7 @@
       setPersistentSyncIntent(true);
       saveTokenSession(tokenResponse);
       scheduleProactiveRefresh();
-      console.log('[FactFlow Sync] applyTokenResponse', {
+      console.log('[DivisionFlow Sync] applyTokenResponse', {
         hasToken: !!syncState.accessToken,
         expiresAt: new Date(syncState.tokenExpiresAt).toISOString(),
         expiresIn: tokenResponse.expires_in
@@ -3753,7 +3754,7 @@
     }
 
     function onGoogleSignedIn() {
-      console.log('[FactFlow Sync] onGoogleSignedIn start', {
+      console.log('[DivisionFlow Sync] onGoogleSignedIn start', {
         signedIn: syncState.signedIn,
         hasToken: !!syncState.accessToken,
         tokenExpiresAt: syncState.tokenExpiresAt ? new Date(syncState.tokenExpiresAt).toISOString() : null
@@ -3968,18 +3969,18 @@
       }
 
       if (!isTokenValid()) {
-        console.warn('[FactFlow Sync] driveFetch: token invalid or expired');
+        console.warn('[DivisionFlow Sync] driveFetch: token invalid or expired');
         return Promise.reject(new Error('TOKEN_EXPIRED'));
       }
 
       options.headers = options.headers || {};
       options.headers.Authorization = 'Bearer ' + syncState.accessToken;
 
-      console.log('[FactFlow Sync] driveFetch', { method: options.method || 'GET', url: url.replace(/\?.*/, '?…').substring(0, 80) });
+      console.log('[DivisionFlow Sync] driveFetch', { method: options.method || 'GET', url: url.replace(/\?.*/, '?…').substring(0, 80) });
 
       if (typeof AbortController === 'undefined') {
         return fetch(url, options).then(function (r) {
-          console.log('[FactFlow Sync] Drive API response', { url: url.replace(/\?.*/, '?…').substring(0, 80), status: r.status, ok: r.ok });
+          console.log('[DivisionFlow Sync] Drive API response', { url: url.replace(/\?.*/, '?…').substring(0, 80), status: r.status, ok: r.ok });
           return r;
         });
       }
@@ -3995,7 +3996,7 @@
 
       return fetch(url, options).then(function (r) {
         clearTimeout(timer);
-        console.log('[FactFlow Sync] Drive API response', { url: url.replace(/\?.*/, '?…').substring(0, 80), status: r.status, ok: r.ok });
+        console.log('[DivisionFlow Sync] Drive API response', { url: url.replace(/\?.*/, '?…').substring(0, 80), status: r.status, ok: r.ok });
         return r;
       }).catch(function (e) {
         clearTimeout(timer);
@@ -4016,13 +4017,13 @@
       var q = "name='" + DRIVE_FILE_NAME.replace(/'/g, "\\'") + "' and trashed=false";
       var url = DRIVE_API_BASE + '/files?spaces=appDataFolder&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc&q=' + encodeURIComponent(q);
 
-      console.log('[FactFlow Sync] findDriveFile searching appDataFolder', { fileName: DRIVE_FILE_NAME });
+      console.log('[DivisionFlow Sync] findDriveFile searching appDataFolder', { fileName: DRIVE_FILE_NAME });
 
       return driveFetch(url, { method: 'GET' })
         .then(function (r) {
           if (!r.ok) {
             return r.text().then(function (text) {
-              console.error('[FactFlow Sync] Drive file search failed', r.status, text);
+              console.error('[DivisionFlow Sync] Drive file search failed', r.status, text);
               throw makeDriveApiError('Drive file search failed', r, text);
             });
           }
@@ -4030,7 +4031,7 @@
         })
         .then(function (data) {
           var files = data.files || [];
-          console.log('[FactFlow Sync] findDriveFile results', { fileCount: files.length, files: files.map(function(f) { return { id: f.id, name: f.name, modifiedTime: f.modifiedTime }; }) });
+          console.log('[DivisionFlow Sync] findDriveFile results', { fileCount: files.length, files: files.map(function(f) { return { id: f.id, name: f.name, modifiedTime: f.modifiedTime }; }) });
           if (!files.length) return null;
 
           syncState.driveFileId = files[0].id;
@@ -4057,7 +4058,7 @@
       var downloadPromises = files.map(function (f) {
         return downloadDriveProgress(f.id).catch(function (e) {
           if (typeof console !== 'undefined' && console.warn && e && e.status !== 404) {
-            console.warn('[FactFlow sync] Duplicate download failed (non-404), will retry later:', e.status || e.message);
+            console.warn('[DivisionFlow sync] Duplicate download failed (non-404), will retry later:', e.status || e.message);
           }
           return null;
         });
@@ -4138,19 +4139,19 @@
     function downloadDriveProgress(fileId) {
       if (!fileId) return Promise.resolve(null);
 
-      console.log('[FactFlow Sync] downloadDriveProgress', { fileId: fileId });
+      console.log('[DivisionFlow Sync] downloadDriveProgress', { fileId: fileId });
 
       return driveFetch(DRIVE_API_BASE + '/files/' + encodeURIComponent(fileId) + '?alt=media', { method: 'GET' })
         .then(function (r) {
           if (r.status === 404) {
-            console.log('[FactFlow Sync] downloadDriveProgress: file not found (404)');
+            console.log('[DivisionFlow Sync] downloadDriveProgress: file not found (404)');
             syncState.driveFileId = null;
             syncState.driveModifiedTime = null;
             return null;
           }
           if (!r.ok) {
             return r.text().then(function (text) {
-              console.error('[FactFlow Sync] Drive download failed', r.status, text);
+              console.error('[DivisionFlow Sync] Drive download failed', r.status, text);
               var err = new Error('Drive download failed: ' + r.status);
               err.status = r.status;
               var googleError = parseGoogleApiErrorText(text);
@@ -4187,9 +4188,9 @@
     }
 
     function uploadDriveProgress(progress) {
-      console.log('[FactFlow Sync] uploadDriveProgress start', { hasFileId: !!syncState.driveFileId, fileId: syncState.driveFileId });
+      console.log('[DivisionFlow Sync] uploadDriveProgress start', { hasFileId: !!syncState.driveFileId, fileId: syncState.driveFileId });
       var wrapped = wrapProgressForDrive(progress);
-      var boundary = 'factflow_boundary_' + Date.now() + '_' + makeRandomSuffix();
+      var boundary = 'divisionflow_boundary_' + Date.now() + '_' + makeRandomSuffix();
       var metadata;
       var url;
       var method;
@@ -4223,7 +4224,7 @@
         }
         if (!r.ok) {
           return r.text().then(function (text) {
-            console.error('[FactFlow Sync] Drive upload failed', r.status, text);
+            console.error('[DivisionFlow Sync] Drive upload failed', r.status, text);
             var err = new Error('Drive upload failed: ' + r.status);
             err.status = r.status;
             var googleError = parseGoogleApiErrorText(text);
@@ -4657,7 +4658,7 @@
 
     // ═══════════════════════════ SYNC ORCHESTRATION ═══════════════════════════
     function syncNow(reason) {
-      console.log('[FactFlow Sync] syncNow start', { reason: reason, signedIn: syncState.signedIn, online: navigator.onLine, isSyncing: syncState.isSyncing });
+      console.log('[DivisionFlow Sync] syncNow start', { reason: reason, signedIn: syncState.signedIn, online: navigator.onLine, isSyncing: syncState.isSyncing });
       if (reason === 'manual') clearSyncBlockState();
 
       if (SHARED_DEVICE_MODE && !isGooglePracticeSession()) {
@@ -5750,55 +5751,9 @@
       return [];
     }
 
-    function cloneProblemWithFlippedDisplay(item, previousProblem) {
-      var flipped;
-      var key;
-
-      if (!item || !previousProblem) return item;
-      if (item.displayKey !== previousProblem.displayKey) return item;
-      if (item.left === item.right) return item;
-
-      flipped = {};
-      for (key in item) {
-        if (Object.prototype.hasOwnProperty.call(item, key)) {
-          flipped[key] = item[key];
-        }
-      }
-
-      flipped.left = item.right;
-      flipped.right = item.left;
-      flipped.displayKey = flipped.left + 'x' + flipped.right;
-      return flipped;
-    }
-
     function buildSafeFallbackPool(allPool, previousProblem, recentFamilies) {
-      var strictPool;
-      var exactOnlyPool;
-      var flippedPool;
-
-      if (!allPool || !allPool.length) return [];
-
-      strictPool = filterImmediateRepeatPool(allPool, previousProblem, recentFamilies);
-      if (strictPool.length) return strictPool;
-
-      exactOnlyPool = allPool.filter(function (item) {
-        return !isExactPreviousDisplay(item, previousProblem);
-      });
-      if (exactOnlyPool.length) return exactOnlyPool;
-
-      // Emergency case: if the only available non-square fact was generated in the
-      // same orientation as the previous display, flip its visual order rather than
-      // showing the exact same string again.
-      flippedPool = allPool.map(function (item) {
-        return cloneProblemWithFlippedDisplay(item, previousProblem);
-      }).filter(function (item) {
-        return !isExactPreviousDisplay(item, previousProblem);
-      });
-      if (flippedPool.length) return flippedPool;
-
-      // If a table truly has only one square fact available, an exact repeat is
-      // mathematically unavoidable. This is the only place where it is allowed.
-      return allPool;
+      var filtered = filterImmediateRepeatPool(allPool, previousProblem, recentFamilies);
+      return filtered.length ? filtered : allPool;
     }
 
     function rememberRecentProblemFamily(problem) {
@@ -5847,11 +5802,11 @@
         var item = {
           table: table, second: second,
           left: pres.left, right: pres.right,
-          answer: table * second,
+          answer: second,
           weight: pri.weight,
           status: pri.status,
           familyKey: makeFactFamilyKey(table, second),
-          displayKey: pres.left + 'x' + pres.right
+          displayKey: pres.left + '÷' + pres.right
         };
 
         fallbackPool.push(item);
@@ -5933,11 +5888,11 @@
           return {
             table: fac, second: second,
             left: pres.left, right: pres.right,
-            answer: fac * second,
+            answer: second,
             weight: pri.weight,
             status: pri.status,
             familyKey: makeFactFamilyKey(fac, second),
-            displayKey: pres.left + 'x' + pres.right
+            displayKey: pres.left + '÷' + pres.right
           };
         });
       }
@@ -5979,11 +5934,11 @@
           item = {
             table: tbl, second: sec,
             left: pres.left, right: pres.right,
-            answer: tbl * sec,
+            answer: sec,
             weight: weight,
             status: status,
             familyKey: makeFactFamilyKey(tbl, sec),
-            displayKey: pres.left + 'x' + pres.right
+            displayKey: pres.left + '÷' + pres.right
           };
 
           if (s.shown === 0 || status === 'learning' || status === 'near-ready' || status === 'struggling') {
@@ -6020,10 +5975,8 @@
       };
     }
 
-    function choosePresentation(orderMode, a, b) {
-      if (orderMode === 'fixed') return { left: a, right: b };
-      if (orderMode === 'reverse') return { left: b, right: a };
-      return Math.random() < 0.5 ? { left: a, right: b } : { left: b, right: a };
+    function choosePresentation(orderMode, divisor, quotient) {
+      return { left: divisor * quotient, right: divisor };
     }
 
     function weightedPick(items) {
@@ -6294,7 +6247,7 @@
 
       var selection = chooseNextProblem(lastProblemInfo, progress);
       if (!selection || !selection.problem) {
-        console.error('[FactFlow] Unable to choose next problem.');
+        console.error('[DivisionFlow] Unable to choose next problem.');
         stopRound(true, 'no-problem');
         return;
       }
@@ -6321,14 +6274,14 @@
 
       if (el.newFactLabel) {
         if (isNewFactIntro) {
-          el.newFactLabel.textContent = 'New fact: ' + round.currentProblem.left + ' \u00d7 ' + round.currentProblem.right + ' = ' + round.currentProblem.answer;
+          el.newFactLabel.textContent = 'New fact: ' + round.currentProblem.left + ' \u00f7 ' + round.currentProblem.right + ' = ' + round.currentProblem.answer;
           el.newFactLabel.classList.add('visible');
         } else {
           el.newFactLabel.textContent = '';
           el.newFactLabel.classList.remove('visible');
         }
       }
-      el.problemText.textContent = p.left + ' \u00d7 ' + p.right;
+      el.problemText.textContent = p.left + ' \u00f7 ' + p.right;
       el.answerInput.value = '';
       el.answerInput.disabled = false;
       focusIfDesktop(el.answerInput);
@@ -6363,7 +6316,7 @@
       round.progressDirty = true;
       schedulePostQuestionWork(round.progress);
       var answer = round.currentProblem.answer;
-      el.timeoutAnswer.textContent = round.currentProblem.left + ' \u00d7 ' + round.currentProblem.right + ' = ' + answer;
+      el.timeoutAnswer.textContent = round.currentProblem.left + ' \u00f7 ' + round.currentProblem.right + ' = ' + answer;
       buzz([50, 30, 50]);
       el.timeoutOverlay.classList.add('active');
       el.timeoutInput.disabled = false;
@@ -6453,7 +6406,7 @@
 
         if (PERF_DEBUG) {
           var tNow = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-          console.log('FactFlow transition', {
+          console.log('DivisionFlow transition', {
             ms: Math.round((tNow - perfCounters.transitionStart) * 10) / 10,
             loadProgress: perfCounters.loadProgress,
             saveProgress: perfCounters.saveProgress,
@@ -6562,13 +6515,13 @@
         newTable = progress.currentTable;
         model = getActiveModel(progress);
 
-        msg += 'You graduated to \u00d7' + newTable + '! ';
-        el.graduateBanner.textContent = 'You mastered \u00d7' + oldTable + '! Now working on \u00d7' + newTable + '.';
+        msg += 'You graduated to \u00f7' + newTable + '! ';
+        el.graduateBanner.textContent = 'You mastered \u00f7' + oldTable + '! Now working on \u00f7' + newTable + '.';
         el.graduateBanner.classList.add('active');
 
         celebrateVerticalStageAdvance(oldTable, newTable, progress);
       }
-      msg += 'Active through \u00d7' + model.maxSecond + '.';
+      msg += 'Active up to ' + (progress.currentTable * model.maxSecond) + ' ÷ ' + progress.currentTable + '.';
       var newBreakdown = getMasteryBreakdown(progress);
       var newScore = calculateOverallMasteryScore(newBreakdown.fluent, newBreakdown.inProgress, prevAccuracy, prevFpm);
       var completedAllFacts = hasCompletedAllFacts(progress, newScore);
@@ -6576,7 +6529,7 @@
 
       if (completedAllFacts) {
         progress.hasReachedLevel100 = true;
-        msg = 'Amazing! You mastered all multiplication facts from x2 to x12! Your FactFlow mastery score is 100.';
+        msg = 'Amazing! You mastered all division facts from ÷2 to ÷12! Your DivisionFlow mastery score is 100.';
       }
       setStatus(el.roundStatus, msg, (graduated || completedAllFacts) ? 'good' : '');
       if (el.scoreNote) {
@@ -6654,7 +6607,7 @@
         if (status === 'fluent' || status === 'review') masteredCount++;
       });
 
-      var msg = '✅ You mastered the ×' + oldTable + 's! (' + masteredCount + ' of 11 facts green) → Now on ×' + newTable + '!';
+      var msg = '✅ You mastered the ÷' + oldTable + 's! (' + masteredCount + ' of 11 facts green) → Now on ÷' + newTable + '!';
       showLevelUpToast(msg);
       launchConfettiOnce();
     }
@@ -6796,8 +6749,8 @@
           el.completionVideo.loop = true;
           el.completionVideo.setAttribute('loop', '');
           el.completionVideo.muted = true;
-          if (!el.completionVideo._factflowLoopPatch) {
-            el.completionVideo._factflowLoopPatch = true;
+          if (!el.completionVideo._divisionflowLoopPatch) {
+            el.completionVideo._divisionflowLoopPatch = true;
             el.completionVideo.addEventListener('ended', function () {
               try {
                 if (el.completionCelebration && el.completionCelebration.classList.contains('active')) {
@@ -6913,7 +6866,7 @@
       endedAt = options.endedAt || Date.now();
       elapsedSec = Math.max(1, Math.round((endedAt - (r && r.startedAt ? r.startedAt : endedAt)) / 1000));
       roundId = [
-        'ff',
+        'df',
         classroomState.teacherKey || 'class',
         r && r.startedAt ? r.startedAt : endedAt,
         r && r.focusTable != null ? r.focusTable : 'unknown',
@@ -6962,7 +6915,7 @@
       breakdown = getMasteryBreakdown(progress);
 
       payload = {
-        app: 'FactFlowPractice',
+        app: 'DivisionFlowPractice',
         schemaVersion: 1,
         submitVersion: CLASSROOM_SUBMIT_VERSION,
         teacherKey: classroomState.teacherKey,
@@ -7038,7 +6991,7 @@
       // web apps deployed to a Google Workspace domain sometimes return a
       // sign-in HTML page on unauthenticated GET requests (even when the
       // deployment is set to "Anyone"). The POST itself performs a real
-      // receiver check (the script returns receiver: "factflow-practice-v1"
+      // receiver check (the script returns receiver: "divisionflow-practice-v1"
       // on success), so a separate pre-flight GET is unnecessary.
       //
       // The URL format is enforced by isClassroomSubmitUrlConfigured() and
@@ -7049,14 +7002,7 @@
     }
 
     function isClassroomReceiverNameAcceptable(data) {
-      var receiver = String(data && data.receiver ? data.receiver : '').trim();
-
-      if (!receiver) return true;
-      if (receiver === 'factflow-practice-v1') return true;
-      if (receiver.indexOf('factflow-practice-') === 0) return true;
-      if (receiver.indexOf('factflow-combined-') === 0) return true;
-
-      return false;
+      return !!data && data.receiver === 'divisionflow-practice-v1';
     }
 
     function isTypedColumnNumberFormatErrorMessage(message) {
@@ -7177,7 +7123,7 @@
       verifyClassroomPracticeReceiver().then(function (ready) {
         if (!ready) {
           classroomState.lastSubmitOk = false;
-          classroomState.lastSubmitError = 'The Apps Script receiver has not been updated for FactFlow practice submissions.';
+          classroomState.lastSubmitError = 'The Apps Script receiver has not been updated for DivisionFlow practice submissions.';
           updateClassroomSubmitUi('error', 'Receiver needs updating. Practice was not sent.');
           return;
         }
@@ -7535,7 +7481,7 @@
       milestones.forEach(function (m) {
         var xNum = xPosByIndex(m.index);
         var x = xNum.toFixed(1);
-        var label = 'x' + m.table;
+        var label = '÷' + m.table;
         var markerWidth = Math.max(24, 12 + label.length * 6);
         var markerHeight = 16;
         var markerY = top + 3;
@@ -7608,11 +7554,11 @@
 
       for (var t = STARTING_TABLE; t <= MAX_TABLE; t++) {
         var isCurrentRow = t === currentTable;
-        html += '<span class="pg-row-label' + (isCurrentRow ? ' current-row' : '') + '">x' + t + '</span>';
+        html += '<span class="pg-row-label' + (isCurrentRow ? ' current-row' : '') + '">÷' + t + '</span>';
 
         for (var s = 2; s <= 12; s++) {
           var cls = '';
-          var title = t + 'x' + s;
+          var title = (t * s) + ' ÷ ' + t + ' = ' + s;
 
           if (isCurrentRow) cls += ' current-row';
 
@@ -7655,8 +7601,8 @@
     function updatePracticeHeader(progress) {
       progress = progress || (round && round.progress) || loadProgress();
       var model = getActiveModel(progress);
-      el.practiceTitle.textContent = '×' + progress.currentTable + ' Tables';
-      el.practiceSubtitle.textContent = model.activeFacts.length + ' facts active through \u00d7' + model.maxSecond;
+      el.practiceTitle.textContent = '÷' + progress.currentTable + ' Tables';
+      el.practiceSubtitle.textContent = model.activeFacts.length + ' facts active up to ' + (progress.currentTable * model.maxSecond) + ' ÷ ' + progress.currentTable;
     }
 
     function renderAuthUI() {
@@ -7934,7 +7880,7 @@
     function getThemePref() {
       var pref = 'system';
       try {
-        pref = localStorage.getItem(THEME_PREF_KEY) || localStorage.getItem('factflow-theme') || 'system';
+        pref = localStorage.getItem(THEME_PREF_KEY) || localStorage.getItem('divisionflow-theme') || 'system';
       } catch (e) {}
       if (pref !== 'light' && pref !== 'dark' && pref !== 'system') pref = 'system';
       return pref;
@@ -7962,7 +7908,7 @@
       if (pref !== 'light' && pref !== 'dark' && pref !== 'system') return;
       try {
         localStorage.setItem(THEME_PREF_KEY, pref);
-        localStorage.removeItem('factflow-theme');
+        localStorage.removeItem('divisionflow-theme');
       } catch (e) {}
       applyThemeFromPref();
     }

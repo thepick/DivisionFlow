@@ -21,10 +21,11 @@ Desktop.ini
 *.sublime-workspace
 
 # Development versions (keep only the release file)
-factflow-v*.html
-factflow-v*
+divisionflow-v*.html
+divisionflow-v*
 
 # Logs and temp files
 *.log
 *.tmp
 *.bak
+

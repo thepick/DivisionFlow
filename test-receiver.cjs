@@ -53,4 +53,18 @@ const posted = {app:'FactFlowCheck',schemaVersion:2,assessmentId:'ffc-test-1',te
   assert.equal(sheets.get('Raw Data').getLastRow(),5);
   assert.ok(sheets.has('FactFlow Practice'));
 
-console.log('PASS: shared receiver routing, retries, latest snapshots, failure recovery, and separate practice reporting.');
+const post = data => rx.doPost({postData:{contents:JSON.stringify(data)}});
+const division = {app:'DivisionFlowPractice',teacherKey:'IP5/8',roundId:'round-1',studentName:'Practice Student',studentEmail:'test@example.com',currentTable:3};
+assert.equal(post(division).receiver,'divisionflow-practice-v1');
+assert.equal(post(division).ok,true);
+assert.equal(sheets.get('DivisionFlow Raw Data').getLastRow(),2);
+assert.equal(sheets.get('DivisionFlow Practice').getLastRow(),2);
+assert.equal(sheets.get('DivisionFlow Practice').rows[1][5],3);
+assert.equal(sheets.get('Practice Raw Data').getLastRow(),2);
+assert.equal(sheets.get('FactFlow Practice').getLastRow(),2);
+assert.equal(sheets.get('Raw Data').getLastRow(),5);
+for (const bad of [{teacherKey:'INVALID'},{expectedSpreadsheetId:'WRONG'},{roundId:''},{app:'Unknown'}]) {
+  assert.equal(post({...division,...bad}).ok,false);
+}
+assert.equal(sheets.get('DivisionFlow Raw Data').getLastRow(),2);
+console.log('PASS: both practice apps share a spreadsheet with isolated tabs and retries; existing assessment checks pass.');

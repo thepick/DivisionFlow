@@ -1,136 +1,41 @@
-# FactFlow Classroom Submission Setup
+# DivisionFlow launch setup
 
-## Shared receiver upgrade for independent assessments
+## Shared Google Sheets receiver
 
-The receiver now matches FactFlow Quiz 2.8.0. Deploy this receiver (or the identical copy in FactFlow Quiz) before updating Quiz. Keep the existing Web App deployment URL by using Manage deployments → Edit → New version → Deploy.
+For each existing class Apps Script deployment used by FactFlow:
 
-Check results receive an assessment ID, a verified spreadsheet receipt, retry deduplication, and protection against older retries replacing newer snapshots. The Check and Raw Data tabs remain separate from FactFlow Practice and Practice Raw Data. FactFlow's practice app and progress are unchanged: there is no placement import or transfer of assessment results into practice mastery.
+1. Open the class spreadsheet and choose Extensions → Apps Script.
+2. Replace the receiver source with `factflow-practice-apps-script.gs` from this repository. This version supports FactFlow, DivisionFlow, and existing FactFlow Quiz assessments.
+3. Keep the V8 runtime and existing deployment permissions.
+4. Choose Deploy → Manage deployments → Edit → New version → Deploy. Preserve the existing deployment URL.
+5. Confirm that the URL and spreadsheet ID still match the class entry in `TEACHERS` in `index.html`.
 
-Run `node test-receiver.cjs` for local receiver regression checks. A real deployment smoke test is still needed after publishing the Apps Script update.
+The new receiver creates `DivisionFlow Practice` and `DivisionFlow Raw Data` in the same spreadsheet as FactFlow. It does not rename FactFlow tabs or reuse their rows. DivisionFlow submissions use `app: DivisionFlowPractice`; an old receiver rejects this app instead of recording it as multiplication. The browser requires a `divisionflow-practice-v1` receipt and the expected spreadsheet ID.
 
-This patch adds classroom submission to the regular FactFlow practice app.
+Use this shared receiver version for future updates from either project; replacing it with the older FactFlow-only version would disable division submissions.
 
-## URL behavior
+## Google sign-in
 
-- `https://factflow.mtomlinson.ca` stays personal practice only.
-- `https://factflow.mtomlinson.ca?t=IP5/8` enables classroom mode for IP5/8.
-- `https://factflow.mtomlinson.ca?t=IP5/9` enables classroom mode for IP5/9.
-- `https://factflow.mtomlinson.ca?t=IP6/8` enables classroom mode for IP6/8.
-- `https://factflow.mtomlinson.ca?t=IP6/9` enables classroom mode for IP6/9.
-- Invalid `?t=` values fail closed and do not submit anywhere.
+DivisionFlow intentionally uses the existing FactFlow OAuth client but a different Drive data filename. In that client's Google Cloud configuration, add this Authorized JavaScript origin:
 
-For final production, the same rules apply on `https://factflow.mtomlinson.ca`.
-
-## What has already been filled in
-
-The `TEACHERS` map in `index.html` now contains the existing class Apps Script Web App URLs from the FactFlow Quiz app:
-
-```javascript
-var TEACHERS = {
-  'IP5/9': {
-    name: 'Ajarn Michael - IP5/9',
-    url: 'https://script.google.com/macros/s/AKfycbyuE5nR4e0d-qS5xvsoK_DdyUwUlBt-0uCBbG2KgNnhnF63B-B4g-DI819f5MfwDR93Bg/exec'
-  },
-  'IP5/8': {
-    name: 'Ajarn Jordan - IP5/8',
-    url: 'https://script.google.com/macros/s/AKfycbz1DSGVUh2rCaQBRAnf9SuXiF3Ki6tEXKSRNsoiKt-v8z8-UIMARxclA-YjCaU2fQO2OA/exec'
-  },
-  'IP6/8': {
-    name: 'Ajarn Josh - IP6/8',
-    url: 'https://script.google.com/macros/s/AKfycbyJy786id7wxrcmooLTtht-durRYpvvxrjHlDteJm1_I4vy6qMLmFv56kUCsKJCn-2ZIQ/exec'
-  },
-  'IP6/9': {
-    name: 'Ajarn Josh - IP6/9',
-    url: 'https://script.google.com/macros/s/AKfycby4nJY3uDXL68oKV-7bBVyxJbVTbQeIdHJ4UZm3MeiBHrQ7lYfePdwEPMSqGoTMMKQc/exec'
-  }
-};
+```
+https://divisionflow.mtomlinson.ca
 ```
 
-Important: those URLs are filled in, but the Google Apps Script projects behind those URLs still need to use the combined receiver included in this project. If the old FactFlow Quiz-only receiver is still deployed, the app will now fail closed: it checks the receiver first and will not send practice data unless the receiver reports `factflow-combined-v1`.
+Retain FactFlow's existing origin. If previewing on GitHub Pages, authorize `https://thepick.github.io` too. OAuth origins contain no path. A separate OAuth client is optional; if chosen, replace `GOOGLE_CLIENT_ID` in DivisionFlow only.
 
-## Required Google Apps Script update
+## Hosting
 
-For each class spreadsheet/script project:
+The intended address is `https://divisionflow.mtomlinson.ca`. Enable GitHub Pages from `main`, repository root. Add the custom domain to Pages and point the `divisionflow` DNS CNAME to `thepick.github.io`. Wait for DNS and the HTTPS certificate, then enforce HTTPS. Do not change FactFlow's DNS record.
 
-1. Open the class Google Sheet.
-2. Go to Extensions > Apps Script.
-3. Replace the existing script with `factflow-practice-apps-script.gs` from this zip.
-4. Confirm the project uses the V8 runtime.
-5. Deploy the updated Web App.
-   - Execute as: Me
-   - Who has access: Anyone
-6. Confirm the Web App URL still matches the URL in the `TEACHERS` map.
-7. If Google gives you a new Web App URL, paste the new URL into the matching `TEACHERS` entry in `index.html` and redeploy/upload FactFlow again.
+## Classroom smoke test
 
-The included Apps Script is designed to preserve the existing FactFlow Quiz behavior while adding separate practice tabs for the regular FactFlow practice app. The FactFlow practice app performs a safety check before POSTing practice data, so the combined receiver must be deployed before classroom practice submissions can be accepted.
+After the receiver and OAuth updates:
 
-## Required Google OAuth check
+1. Sign in at the new site. Confirm fresh division progress; FactFlow still retains multiplication progress.
+2. Complete one round at `?t=IP5/9`. Confirm `DivisionFlow Practice` updates in that class's existing sheet and FactFlow's row is unchanged.
+3. Test each other class route after its receiver is updated.
+4. Verify plain links do not submit and `?t=INVALID` rejects submission.
+5. Sign in on a second device and confirm DivisionFlow restores only division progress.
 
-Because this app uses Google sign-in/Drive sync, make sure the production origin is authorized in the Google OAuth client used by FactFlow:
-
-```text
-https://factflow.mtomlinson.ca
-```
-
-If the origin is missing, Google sign-in or Drive sync may fail.
-
-## CNAME
-
-The `CNAME` file is set to:
-
-```text
-factflow.mtomlinson.ca
-```
-
-## What gets submitted
-
-When a student opens a valid classroom link and signs in with Google, FactFlow sends one submission after each completed practice round.
-
-Each submission includes:
-
-- Student name
-- Student email
-- Student key
-- Class key
-- Round ID
-- Round start/end time
-- Configured round duration
-- Actual elapsed time
-- Whether the round completed fully
-- Stop reason
-- Attempted, correct, incorrect
-- Accuracy
-- Facts per minute
-- Best streak
-- Timeout count
-- Graduation information
-- Current table
-- Overall fluent, learning, and struggling fact counts
-
-## Sheet tabs created
-
-The Apps Script creates separate practice tabs:
-
-- `Practice Raw Data`: one row per completed round
-- `FactFlow Practice`: one row per student, updated after each completed practice round
-
-The same script still preserves the existing FactFlow Quiz behavior using the original `Raw Data` tab and the `Check` summary tab.
-
-## Suggested test links
-
-Test these links in this order:
-
-```text
-https://factflow.mtomlinson.ca
-https://factflow.mtomlinson.ca?t=IP5/8
-https://factflow.mtomlinson.ca?t=IP5/9
-https://factflow.mtomlinson.ca?t=IP6/8
-https://factflow.mtomlinson.ca?t=IP6/9
-https://factflow.mtomlinson.ca?t=INVALID
-```
-
-Expected behavior:
-
-- The first link has no classroom submission UI.
-- IP5/8, IP5/9, IP6/8, and IP6/9 show classroom mode and auto-submit after completed rounds.
-- The invalid class link fails closed and does not submit anywhere.
+Local checks use mocked Google services. A passing local test does not verify live OAuth or Apps Script deployment.

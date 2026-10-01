@@ -1,4 +1,4 @@
-// FactFlow / FactFlow Quiz - combined Google Sheets receiver
+// FactFlow / DivisionFlow / FactFlow Quiz - combined Google Sheets receiver
 // Paste this entire file into Extensions > Apps Script in the target Google Sheet.
 // Deploy as Web App:
 //   Execute as: Me
@@ -17,7 +17,7 @@
 //
 // There is deliberately NO fallback spreadsheet. If a submission does not include
 // a valid class code, the upload is rejected before any sheet is opened or written.
-var BUILD_VERSION = 'factflow-combined-v6-quiz-tabs';
+var BUILD_VERSION = 'factflow-combined-v7-divisionflow';
 
 var CLASS_SPREADSHEET_IDS = {
   'ip5/8': '1VYs2dbduN8s5R3YEoOzIqQO2fnHko0YQypd3MYKn3Wg',
@@ -138,7 +138,7 @@ function readJsonPayload(e) {
 function doPost(e) {
   try {
     var data = readJsonPayload(e);
-    if (data && data.app === 'FactFlowPractice') {
+    if (data && (data.app === 'FactFlowPractice' || data.app === 'DivisionFlowPractice')) {
       return handleFactFlowPractice(data, e);
     }
     if (data && data.app && data.app !== 'FactFlowCheck') throw new Error('Unknown app.');
@@ -321,8 +321,8 @@ function ensureMinimumColumns(sheet, count) {
 // Visible practice summary tab: FactFlow Practice
 // Hidden practice log tab: Practice Raw Data
 // -----------------------------------------------------------------------------
-function ensurePracticeRawSheet(ss) {
-  return ensureSheet(ss, 'Practice Raw Data', [
+function ensurePracticeRawSheet(ss, division) {
+  return ensureSheet(ss, division ? 'DivisionFlow Raw Data' : 'Practice Raw Data', [
     'Timestamp',
     'Student',
     'Email',
@@ -357,8 +357,8 @@ function ensurePracticeRawSheet(ss) {
   ], true);
 }
 
-function ensurePracticeSummarySheet(ss) {
-  return ensureSheet(ss, 'FactFlow Practice', [
+function ensurePracticeSummarySheet(ss, division) {
+  return ensureSheet(ss, division ? 'DivisionFlow Practice' : 'FactFlow Practice', [
     'Student',
     'Email',
     'Student Key',
@@ -380,7 +380,7 @@ function ensurePracticeSummarySheet(ss) {
     'Last Graduation',
     'Total Submitted Rounds',
     'Last Round ID'
-  ], false, ['FactFlow', 'Practice Summary']);
+  ], false, division ? [] : ['FactFlow', 'Practice Summary']);
 }
 
 function hasRoundAlready(rawSheet, roundId) {
@@ -556,8 +556,9 @@ function handleFactFlowPractice(data, e) {
     var spreadsheetId = resolveTargetSpreadsheetId(data, e);
     assertExpectedSpreadsheetId(data, spreadsheetId);
     var ss = SpreadsheetApp.openById(spreadsheetId);
-    var rawSheet = ensurePracticeRawSheet(ss);
-    var summary = ensurePracticeSummarySheet(ss);
+    var division = data.app === 'DivisionFlowPractice';
+    var rawSheet = ensurePracticeRawSheet(ss, division);
+    var summary = ensurePracticeSummarySheet(ss, division);
 
     if (!hasRoundAlready(rawSheet, data.roundId)) {
       appendPracticeRaw(rawSheet, data);
@@ -569,7 +570,7 @@ function handleFactFlowPractice(data, e) {
 
     return json({
       ok: true,
-      receiver: 'factflow-practice-v1',
+      receiver: data.app === 'DivisionFlowPractice' ? 'divisionflow-practice-v1' : 'factflow-practice-v1',
       buildVersion: BUILD_VERSION,
       student: normalizeName(data.studentName),
       roundId: data.roundId,
@@ -579,7 +580,7 @@ function handleFactFlowPractice(data, e) {
   } catch (err) {
     return json({
       ok: false,
-      receiver: 'factflow-practice-v1',
+      receiver: data.app === 'DivisionFlowPractice' ? 'divisionflow-practice-v1' : 'factflow-practice-v1',
       buildVersion: BUILD_VERSION,
       error: err && err.message ? err.message : String(err),
       spreadsheetId: spreadsheetId,
