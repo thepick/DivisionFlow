@@ -5711,11 +5711,11 @@
       if (!candidate || !previousProblem) return false;
 
       // Exact repeats are never allowed back-to-back.
-      // Example: 6x7 followed by 6x7.
+      // Example: 42 ÷ 6 followed by 42 ÷ 6.
       if (isExactPreviousDisplay(candidate, previousProblem)) return true;
 
       // Same fact-family repeats are blocked when an alternative exists.
-      // This blocks both exact repeats and inverses, such as 6x7 followed by 7x6.
+      // This blocks both exact repeats and inverses, such as 42 ÷ 6 followed by 42 ÷ 7.
       if (candidate.familyKey && candidate.familyKey === previousProblem.familyKey) return true;
 
       return false;
@@ -7392,14 +7392,14 @@
       if (latest) {
         var latestScore = getStoredMasteryScore(latest);
         scoreCardHtml += '<div class="mastery-scorecard">';
-        scoreCardHtml += '<span class="mastery-score-head"><span class="mastery-score-label">Times Table Mastery Score</span><button type="button" class="mastery-info-btn" id="masteryInfoBtn" aria-label="How the mastery score works">?</button></span>';
+        scoreCardHtml += '<span class="mastery-score-head"><span class="mastery-score-label">Division Mastery Score</span><button type="button" class="mastery-info-btn" id="masteryInfoBtn" aria-label="How the mastery score works">?</button></span>';
         scoreCardHtml += '<span class="mastery-big-num">' + latestScore + '</span>';
         scoreCardHtml += '<div class="mastery-stats">';
         scoreCardHtml += '<span class="mastery-stat-piece">' + averageLabel + ' ' + averages.fpm + ' facts/min &middot; Acc ' + averages.acc + '%</span>';
         scoreCardHtml += '</div>';
         scoreCardHtml += '</div>';
       } else {
-        scoreCardHtml += '<div class="mastery-scorecard"><span class="mastery-score-label">Times Table Mastery Score</span><span class="mastery-empty-note">Finish a session to get a score</span></div>';
+        scoreCardHtml += '<div class="mastery-scorecard"><span class="mastery-score-label">Division Mastery Score</span><span class="mastery-empty-note">Finish a session to get a score</span></div>';
       }
 
       var width = 360;
@@ -7459,7 +7459,7 @@
       }
 
       // Build SVG string
-      var svg = '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Times Table Mastery Score Graph">';
+      var svg = '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="Division Mastery Score Graph">';
 
       // Y grid lines and labels
       yTicks.forEach(function (tick) {
